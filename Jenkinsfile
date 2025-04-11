@@ -20,9 +20,18 @@ pipeline {
         
         stage('Test') {
             steps {
-                bat 'docker run -d --name test-container -p 3000:80 icon-library:latest'
-                bat 'sleep 5' // Wait for container to start
-                bat 'curl --fail http://localhost:3000 || exit 1'
+                script {
+            // Free the port if used
+            bat 'for /f "tokens=5" %%a in (\'netstat -aon ^| findstr :3000\') do taskkill /PID %%a /F'
+            // Remove any old container
+            bat 'docker rm -f test-container || true'
+            // Run container
+            bat 'docker run -d --name test-container -p 3000:80 icon-library:latest'
+        }
+                // Wait for the container to be ready
+                sleep(time: 30, unit: 'SECONDS')
+                // Run tests
+                bat 'curl -f http://localhost:3000 || exit 1'
             }
             post {
                 always {
