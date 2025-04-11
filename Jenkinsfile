@@ -19,33 +19,43 @@ pipeline {
         }
 
         stage('Test') {
-            steps {
-                script {
-                    // Kill any process on port 3000 (if it exists)
-                    bat '''
+    steps {
+        script {
+            // Kill any process on port 3000 (Windows)
+            bat '''
 @echo off
+echo Checking for process using port 3000...
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3000') do (
     echo Killing process using port 3000 - PID: %%a
     taskkill /PID %%a /F
 )
 '''
-                    // Remove old container (if it exists)
-                    bat 'docker rm -f test-container || echo No existing container to remove'
 
-                    // Run container for testing
-                    bat 'docker run -d --name test-container -p 3000:80 icon-library:latest'
+            // Remove old container if it exists
+            bat 'docker rm -f test-container || echo "No existing container to remove"'
 
-                    // Wait for the app to be up
-                    sleep(time: 30, unit: 'SECONDS')
+            // Run container
+            bat 'docker run -d --name test-container -p 3000:80 icon-library:latest'
 
-                    // Basic health check
-                    bat 'curl -f http://localhost:3000 || exit 1'
-                }
-            }
+            // Wait for app to be ready
+            sleep(time: 15, unit: 'SECONDS')
 
-            post {
-                always {
-                    bat '''
+            // Health check
+            bat '''
+@echo off
+echo Running health check on http://localhost:3000 ...
+curl -f http://localhost:3000
+if %ERRORLEVEL% NEQ 0 (
+    echo Health check failed
+    exit /b 1
+)
+'''
+        }
+    }
+
+    post {
+        always {
+            bat '''
 @echo off
 echo Stopping test-container...
 docker stop test-container || echo "Docker stop failed, continuing..."
@@ -53,9 +63,10 @@ docker stop test-container || echo "Docker stop failed, continuing..."
 echo Removing test-container...
 docker rm test-container || echo "Docker rm failed, continuing..."
 '''
-                }
-            }
         }
+    }
+}
+
 
         stage('Deploy') {
             steps {
