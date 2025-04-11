@@ -23,26 +23,27 @@ pipeline {
                 script {
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
 
-                        // Kill any process using port 3000
+                        // Kill port 3000 processes safely
                         bat '''
 @echo off
 echo Checking for process using port 3000...
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3000') do (
-    echo Killing process using port 3000 - PID: %%a
+    echo Found process on port 3000 - PID: %%a
     taskkill /PID %%a /F
 )
+exit /b 0
 '''
 
-                        // Remove any existing container
+                        // Remove any old container
                         bat 'docker rm -f test-container || echo "No existing container to remove"'
 
-                        // Start test container
+                        // Run new container
                         bat 'docker run -d --name test-container -p 3000:80 icon-library:latest'
 
-                        // Give it some time to boot up
+                        // Wait for container startup
                         sleep(time: 15, unit: 'SECONDS')
 
-                        // Retryable health check
+                        // Health check with retry
                         bat '''
 @echo off
 set RETRIES=5
@@ -74,23 +75,28 @@ exit /b 0
 
             post {
                 always {
-                    // Print container logs and clean up
+                    // Logs and cleanup
                     bat '''
 @echo off
 echo Fetching test-container logs...
 docker logs test-container || echo "No logs found"
 
 echo Stopping test-container...
-docker stop test-container || echo "Docker stop failed, continuing..."
+docker stop test-container || echo "Docker stop failed"
 
 echo Removing test-container...
-docker rm test-container || echo "Docker rm failed, continuing..."
+docker rm test-container || echo "Docker rm failed"
 '''
                 }
             }
         }
 
         stage('Deploy') {
+            when {
+                expression {
+                    currentBuild.result == null || currentBuild.result == 'SUCCESS'
+                }
+            }
             steps {
                 bat 'docker tag icon-library:latest %DOCKER_HUB_USR%/icon-library:latest'
                 bat 'docker login -u %DOCKER_HUB_USR% -p %DOCKER_HUB_PSW%'
