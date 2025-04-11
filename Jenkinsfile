@@ -35,7 +35,14 @@ pipeline {
             }
             post {
                 always {
-                    bat 'docker stop test-container || true'
+                    bat '''
+@echo off
+docker stop test-container
+if %ERRORLEVEL% NEQ 0 (
+  echo Docker stop failed, but continuing...
+)
+'''
+
                     bat 'docker rm test-container || true'
                 }
             }
