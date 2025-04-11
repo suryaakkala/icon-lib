@@ -20,11 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 iconCard.className = 'icon-card';
                 
                 const img = document.createElement('img');
-                img.src = `icons/${format}/${icon.name}.${format}`;
+                img.src = `/icons/${format}/${icon.name}.${format}`;
                 img.alt = `${icon.name} ${format} icon`;
                 
                 const downloadBtn = document.createElement('a');
-                downloadBtn.href = `icons/${format}/${icon.name}.${format}`;
+                downloadBtn.href = `/icons/${format}/${icon.name}.${format}`;
                 downloadBtn.download = `${icon.name}.${format}`;
                 downloadBtn.textContent = `Download ${format.toUpperCase()}`;
                 downloadBtn.className = 'download-btn';
