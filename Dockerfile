@@ -1,11 +1,12 @@
-# Use nginx to serve static content
 FROM nginx:alpine
 
 # Remove default nginx config
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy everything from src/ into nginx's static folder
+# Copy your static site into nginx's web root
 COPY src/ /usr/share/nginx/html/
 
-# Expose port 80
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
 EXPOSE 80
