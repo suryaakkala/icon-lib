@@ -1,11 +1,11 @@
-# Use a lightweight web server
+# Use nginx to serve static content
 FROM nginx:alpine
 
-# Copy the static website files
-COPY src /usr/share/nginx/html
+# Remove default nginx config
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy everything from src/ into nginx's static folder
+COPY src/ /usr/share/nginx/html/
 
 # Expose port 80
 EXPOSE 80
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
