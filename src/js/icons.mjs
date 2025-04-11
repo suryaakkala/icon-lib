@@ -1,5 +1,5 @@
 // Auto-generated icon list
-const icons = [
+export const icons = [
     { name: '1001tracklists', formats: ["svg"], category: 'devops' },
     { name: '1and1', formats: ["svg"], category: 'technology' },
     { name: '1dot1dot1dot1', formats: ["svg"], category: 'programming' },
@@ -1001,5 +1001,3 @@ const icons = [
     { name: 'flyway', formats: ["svg"], category: 'database' },
     { name: 'fmod', formats: ["svg"], category: 'cloud' },
 ];
-
-export default icons;

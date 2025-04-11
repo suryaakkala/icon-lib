@@ -2,30 +2,33 @@ import { icons } from './icons.mjs'; // or './icons.mjs'
 
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('icons-container');
-
+    console.log('🧠 Starting icon render');
+    console.log('🧠 Total icons:', icons.length);
     function renderIcons(filteredIcons) {
+        const container = document.getElementById('icons-container');
         container.innerHTML = '';
+    
         filteredIcons.forEach(icon => {
             icon.formats.forEach(format => {
+                const filePath = `icons/${format}/${icon.name}.${format}`;
+                console.log(`🖼️ Trying to load: ${filePath}`);
+    
                 const iconCard = document.createElement('div');
                 iconCard.className = 'icon-card';
-
-                const path = `/icons/${format}/${icon.name}.${format}`;
-                console.log(`[LOAD] Trying to load: ${path}`);
-
+    
                 const img = document.createElement('img');
-                img.src = path;
+                img.src = filePath;
                 img.alt = `${icon.name} ${format} icon`;
-
-                img.onerror = () => console.error(`[ERROR] Failed to load: ${path}`);
-                img.onload = () => console.log(`[OK] Loaded: ${path}`);
-
+    
+                img.onerror = () => console.error(`❌ Failed to load: ${filePath}`);
+                img.onload = () => console.log(`✅ Loaded: ${filePath}`);
+    
                 const downloadBtn = document.createElement('a');
-                downloadBtn.href = path;
+                downloadBtn.href = filePath;
                 downloadBtn.download = `${icon.name}.${format}`;
                 downloadBtn.textContent = `Download ${format.toUpperCase()}`;
                 downloadBtn.className = 'download-btn';
-
+    
                 iconCard.appendChild(img);
                 iconCard.appendChild(downloadBtn);
                 container.appendChild(iconCard);
